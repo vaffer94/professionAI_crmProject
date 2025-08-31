@@ -13,7 +13,7 @@ void uiCreateClient(CrmData &crm);
 void uiViewClients(const CrmData &crm);
 void uiEditClient(CrmData &crm);
 void uiDeleteClient(CrmData &crm);
-void uiSearchClient(const CrmData &crm);
+Client *uiSearchClient(CrmData &crm);
 void uiManageInteractions(CrmData &crm);
 
 #endif

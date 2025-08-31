@@ -6,6 +6,7 @@
 using std::cin;
 using std::cout;
 using std::endl;
+using std::getline;
 using std::string;
 
 void showSplashScreen()
@@ -65,29 +66,29 @@ void showMainMenu(CrmData &crm)
 
 void uiCreateClient(CrmData &crm)
 {
-    cout << "👉 [Mock] Creazione cliente...\n";
     string name, surname, birthDate, email, phone;
 
     cout << "Inserisci nome: ";
-    cin >> name;
+    getline(cin >> std::ws, name);
 
     cout << "Inserisci cognome: ";
-    cin >> surname;
+    getline(cin, surname);
 
-    // 🔎 Call CrmData search here
-    Client *existing = crm.searchClient(name, surname);
+    cout << "Inserisci data di nascita (YYYY-MM-DD): ";
+    cin >> birthDate;
+
+    // 🔎 check duplicates by name+surname+birthDate
+    Client *existing = crm.searchClient(name, surname, birthDate);
     if (existing != nullptr)
     {
-        cout << "⚠️  Cliente con cognome e nome '" << surname << " " << name
-             << "' già presente (ID " << existing->id << ").\n";
+        cout << "⚠️  Cliente '" << name << " " << surname
+             << " " << birthDate << "' già presente (ID " << existing->id << ").\n";
         return;
     }
 
-    // Continue asking fields only if not found
-    cout << "Inserisci data di nascita (YYYY-MM-DD): ";
-    cin >> birthDate;
     cout << "Inserisci email: ";
     cin >> email;
+
     cout << "Inserisci telefono: ";
     cin >> phone;
 
@@ -99,7 +100,6 @@ void uiCreateClient(CrmData &crm)
 
 void uiViewClients(const CrmData &crm)
 {
-    cout << "👉 [Mock] Lista clienti...\n";
     cout << "📋 Lista clienti (" << crm.clients.size() << "):" << endl;
 
     if (crm.clients.empty())
@@ -118,7 +118,139 @@ void uiViewClients(const CrmData &crm)
              << "\n";
     }
 }
-void uiEditClient(CrmData &) { cout << "👉 [Mock] Modifica cliente...\n"; }
-void uiDeleteClient(CrmData &) { cout << "👉 [Mock] Eliminazione cliente...\n"; }
-void uiSearchClient(const CrmData &) { cout << "👉 [Mock] Ricerca cliente...\n"; }
+
+void uiEditClient(CrmData &crm)
+{
+    cout << "✏️  Modifica cliente\n";
+
+    // 1) Find the client (reuses your helper; prints the found record)
+    Client *found = uiSearchClient(crm);
+    if (!found)
+        return;
+
+    // 2) Confirm
+    cout << "Confermi modifica di questo cliente? [Y/N]: ";
+    string answer;
+    std::getline(cin, answer);
+    char ch = answer.length() == 1 ? (std::toupper(answer[0])) : 'N';
+
+    if (ch != 'Y')
+    {
+        cout << "↩️  Nessuna modifica.\n";
+        return;
+    }
+
+    // 3) Prompt new values; Enter keeps old
+    string name, surname, birthDate, email, phone;
+
+    cout << "Inserisci nuovi valori (premi ENTER per mantenere il valore attuale):\n";
+    cout << "Nome [" << found->name << "]: ";
+    std::getline(cin >> std::ws, name);
+    if (name.empty())
+        name = found->name;
+
+    cout << "Cognome [" << found->surname << "]: ";
+    std::getline(cin, surname);
+    if (surname.empty())
+        surname = found->surname;
+
+    cout << "Data di nascita (YYYY-MM-DD) [" << found->birthDate << "]: ";
+    std::getline(cin, birthDate);
+    if (birthDate.empty())
+        birthDate = found->birthDate;
+
+    cout << "Email [" << found->email << "]: ";
+    std::getline(cin, email);
+    if (email.empty())
+        email = found->email;
+
+    cout << "Telefono [" << found->phone << "]: ";
+    std::getline(cin, phone);
+    if (phone.empty())
+        phone = found->phone;
+
+    // 4) Apply update through CrmData (by ID)
+    const int id = found->id; // cache before any potential vector reallocation
+    const bool ok = crm.updateClientById(id, name, surname, birthDate, email, phone);
+
+    if (ok)
+    {
+        cout << "✅ Cliente aggiornato: ID=" << id
+             << " | " << name << " " << surname
+             << " | Email=" << email
+             << " | Telefono=" << phone << "\n";
+    }
+    else
+    {
+        cout << "⚠️  Aggiornamento fallito: cliente non trovato.\n";
+    }
+}
+
+void uiDeleteClient(CrmData &crm)
+{
+    string answer;
+    bool removed = false;
+
+    cout << "👉 Eliminazione cliente...\n";
+    Client *found = uiSearchClient(crm);
+    if (!found)
+        return; // nothing to delete
+
+    cout << "Confermi eliminazione? [Y/N]: ";
+    getline(cin, answer);
+    char ch = answer.length() == 1 ? (std::toupper(answer[0])) : 'N';
+
+    if (ch != 'Y')
+    {
+        cout << "↩️  Nessuna modifica.\n";
+        return;
+    }
+
+    // Keep IDs/names before erasing (pointer will be invalidated after erase)
+    const int targetId = found->id;
+    const string fullName = found->name + " " + found->surname;
+
+    removed = crm.deleteClientAndCascade(targetId);
+
+    if (removed)
+    {
+        cout << "✅ Cliente \"" << fullName << "\" (ID " << targetId << ") eliminato insieme alle sue interazioni.\n";
+    }
+    else
+    {
+        cout << "⚠️  Qualcosa è andato storto: cliente non trovato al momento dell’eliminazione.\n";
+    }
+}
+
+Client *uiSearchClient(CrmData &crm)
+{
+    cout << "🔎 Ricerca cliente\n";
+
+    string name, surname, birthDate;
+
+    cout << "Nome: ";
+    getline(cin >> std::ws, name); // Use std::ws to consume any leftover newline
+
+    cout << "Cognome: ";
+    getline(cin, surname);
+
+    cout << "Data di nascita (YYYY-MM-DD): ";
+    getline(cin, birthDate);
+
+    Client *found = crm.searchClient(name, surname, birthDate);
+    if (found)
+    {
+        cout << "✅ Trovato: ID=" << found->id
+             << " | Nome=" << found->name << " " << found->surname
+             << " | Email=" << found->email
+             << " | Telefono=" << found->phone << "\n";
+    }
+    else
+    {
+        cout << "❌ Nessun cliente trovato con: "
+             << name << " " << surname << " " << birthDate << "\n";
+    }
+
+    return found;
+}
 void uiManageInteractions(CrmData &) { cout << "👉 [Mock] Gestione interazioni...\n"; }
