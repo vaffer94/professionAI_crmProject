@@ -29,6 +29,8 @@ void showMainMenu(CrmData &crm)
         cout << "4️⃣  Eliminare un cliente 🗑️\n";
         cout << "5️⃣  Ricercare un cliente 🔎\n";
         cout << "6️⃣  Gestire le interazioni del cliente 🤝\n";
+        cout << "7️⃣  Carica dati da CSV\n";
+        cout << "8️⃣  Salva dati su CSV\n";
         cout << "0️⃣  Uscire\n";
         cout << "> ";
 
@@ -53,6 +55,12 @@ void showMainMenu(CrmData &crm)
             break;
         case 6:
             uiManageInteractions(crm);
+            break;
+        case 7:
+            uiLoadData(crm);
+            break;
+        case 8:
+            uiSaveData(crm);
             break;
         case 0:
             cout << "👋 Uscita dal programma...\n";
@@ -253,4 +261,230 @@ Client *uiSearchClient(CrmData &crm)
 
     return found;
 }
-void uiManageInteractions(CrmData &) { cout << "👉 [Mock] Gestione interazioni...\n"; }
+void uiManageInteractions(CrmData &crm)
+{
+    cout << "🤝 Gestione interazioni (per cliente)\n";
+
+    // 1) choose the client first
+    Client *client = uiSearchClient(crm);
+    if (!client)
+        return;
+
+    int choice = -1;
+    do
+    {
+        cout << "\nInterazioni di: " << client->name << " " << client->surname
+             << " (ID " << client->id << ")\n";
+        cout << "1️⃣  Aggiungi interazione\n";
+        cout << "2️⃣  Visualizza interazioni\n";
+        cout << "3️⃣  Cerca interazioni (per tipo)\n";
+        cout << "0️⃣  Indietro\n> ";
+
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+            uiAddInteraction(crm, *client);
+            break;
+        case 2:
+            uiViewInteractionsForClient(crm, *client);
+            break;
+        case 3:
+            uiSearchInteractionsForClient(crm, *client);
+            break;
+        case 0:
+            cout << "↩️  Ritorno al menu precedente.\n";
+            break;
+        default:
+            cout << "❌ Scelta non valida.\n";
+            break;
+        }
+    } while (choice != 0);
+}
+
+void uiAddInteraction(CrmData &crm, Client &client)
+{
+    cout << "➕ Aggiungi interazione per " << client.name << " " << client.surname << " (ID " << client.id << ")\n";
+
+    // type
+    int typeChoice = 0;
+    do
+    {
+        cout << "Tipo: 1) Appuntamento  2) Contratto  > ";
+        cin >> typeChoice;
+        if (typeChoice < 1 || typeChoice > 2)
+            cout << "❌ Scelta non valida.\n";
+    } while (typeChoice < 1 || typeChoice > 2);
+
+    InteractionType type = (typeChoice == 1) ? InteractionType::Appointment
+                                             : InteractionType::Contract;
+
+    // inteaction fields
+    int statusChoice = 0;
+    do
+    {
+        cout << "Stato: 1) ToDo  2) InProgress  3) Done  4) Cancelled  > ";
+        cin >> statusChoice;
+        if (statusChoice < 1 || statusChoice > 4)
+            cout << "❌ Scelta non valida.\n";
+    } while (statusChoice < 1 || statusChoice > 4);
+
+    InteractionStatus status =
+        (statusChoice == 1) ? InteractionStatus::ToDo : (statusChoice == 2) ? InteractionStatus::InProgress
+                                                    : (statusChoice == 3)   ? InteractionStatus::Done
+                                                                            : InteractionStatus::Cancelled;
+
+    string date, responsible, note;
+
+    cout << "Data (YYYY-MM-DD): ";
+    std::getline(cin >> std::ws, date);
+
+    cout << "Responsabile: ";
+    std::getline(cin, responsible);
+
+    cout << "Note: ";
+    std::getline(cin, note);
+
+    // persist
+    Interaction inter(client.id, type, status, date, responsible, note);
+    crm.interactions.push_back(inter);
+    client.interactionIds.push_back(inter.id);
+
+    cout << "✅ Interazione creata: ID=" << inter.id
+         << " | Tipo=" << (type == InteractionType::Appointment ? "Appuntamento" : "Contratto")
+         << " | Stato=" << (status == InteractionStatus::ToDo ? "ToDo" : status == InteractionStatus::InProgress ? "InProgress"
+                                                                     : status == InteractionStatus::Done         ? "Done"
+                                                                                                                 : "Cancelled")
+         << " | Data=" << date << "\n";
+}
+
+void uiViewInteractionsForClient(const CrmData &crm, const Client &client)
+{
+    cout << "📋 Interazioni per " << client.name << " " << client.surname
+         << " (ID " << client.id << ")\n";
+
+    size_t count = 0;
+    for (size_t i = 0; i < crm.interactions.size(); ++i)
+    {
+        const Interaction &it = crm.interactions[i];
+        if (it.clientId != client.id)
+            continue;
+        ++count;
+
+        cout << " - ID=" << it.id
+             << " | Tipo=" << (it.type == InteractionType::Appointment ? "Appuntamento" : "Contratto")
+             << " | Stato=" << (it.status == InteractionStatus::ToDo ? "ToDo" : it.status == InteractionStatus::InProgress ? "InProgress"
+                                                                            : it.status == InteractionStatus::Done         ? "Done"
+                                                                                                                           : "Cancelled")
+             << " | Data=" << it.date
+             << " | Resp=" << it.responsible
+             << " | Note=" << it.note << "\n";
+    }
+
+    if (count == 0)
+    {
+        cout << "   (nessuna interazione trovata)\n";
+    }
+}
+
+void uiSearchInteractionsForClient(const CrmData &crm, const Client &client)
+{
+    cout << "🔎 Cerca interazioni per tipo — Cliente: "
+         << client.name << " " << client.surname << " (ID " << client.id << ")\n";
+
+    int typeChoice = 0;
+    do
+    {
+        cout << "Tipo da cercare: 1) Appuntamento  2) Contratto  > ";
+        cin >> typeChoice;
+        if (typeChoice < 1 || typeChoice > 2)
+            cout << "❌ Scelta non valida.\n";
+    } while (typeChoice < 1 || typeChoice > 2);
+
+    InteractionType wanted = (typeChoice == 1) ? InteractionType::Appointment
+                                               : InteractionType::Contract;
+
+    size_t count = 0;
+    for (size_t i = 0; i < crm.interactions.size(); ++i)
+    {
+        const Interaction &it = crm.interactions[i];
+        if (it.clientId == client.id && it.type == wanted)
+        {
+            ++count;
+            cout << " - ID=" << it.id
+                 << " | Stato=" << (it.status == InteractionStatus::ToDo ? "ToDo" : it.status == InteractionStatus::InProgress ? "InProgress"
+                                                                                : it.status == InteractionStatus::Done         ? "Done"
+                                                                                                                               : "Cancelled")
+                 << " | Data=" << it.date
+                 << " | Resp=" << it.responsible
+                 << " | Note=" << it.note << "\n";
+        }
+    }
+
+    if (count == 0)
+    {
+        cout << "   (nessuna interazione di questo tipo)\n";
+    }
+}
+
+void uiLoadData(CrmData &crm)
+{
+    cout << "📂 Carica dati da file CSV\n";
+
+    string clientsPath = "clients.csv";
+    string interactionsPath = "interactions.csv";
+    string tmp;
+
+    cout << "Percorso clients.csv [" << clientsPath << "]: ";
+    std::getline(cin >> std::ws, tmp);
+    if (!tmp.empty())
+        clientsPath = tmp;
+
+    cout << "Percorso interactions.csv [" << interactionsPath << "]: ";
+    std::getline(cin, tmp);
+    if (!tmp.empty())
+        interactionsPath = tmp;
+
+    const bool ok = crm.loadFromCsv(clientsPath, interactionsPath);
+    if (ok)
+    {
+        cout << "✅ Dati caricati. Clienti: " << crm.clients.size()
+             << ", Interazioni: " << crm.interactions.size() << "\n";
+    }
+    else
+    {
+        cout << "❌ Impossibile caricare i dati. Verifica percorsi e intestazioni CSV.\n";
+    }
+}
+
+void uiSaveData(const CrmData &crm)
+{
+    cout << "💾 Salva dati su file CSV\n";
+
+    string clientsPath = "clients.csv";
+    string interactionsPath = "interactions.csv";
+    string tmp;
+
+    cout << "Percorso di salvataggio clients.csv [" << clientsPath << "]: ";
+    std::getline(cin >> std::ws, tmp);
+    if (!tmp.empty())
+        clientsPath = tmp;
+
+    cout << "Percorso di salvataggio interactions.csv [" << interactionsPath << "]: ";
+    std::getline(cin, tmp);
+    if (!tmp.empty())
+        interactionsPath = tmp;
+
+    const bool ok = crm.saveToCsv(clientsPath, interactionsPath);
+    if (ok)
+    {
+        cout << "✅ Dati salvati in:\n"
+             << "   - " << clientsPath << "\n"
+             << "   - " << interactionsPath << "\n";
+    }
+    else
+    {
+        cout << "❌ Errore nel salvataggio (permessi, percorso inesistente?).\n";
+    }
+}

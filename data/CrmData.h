@@ -33,6 +33,15 @@ public:
                           const string &birthDate,
                           const string &email,
                           const string &phone);
+
+    // Save all clients and interactions to CSV files. Returns true on success.
+    bool saveToCsv(const string &clientsPath,
+                   const string &interactionsPath) const;
+
+    // Load all clients and interactions from CSV files. Returns true on success.
+    // Keeps IDs from file, and rebuilds Client::interactionIds from interactions.
+    bool loadFromCsv(const string &clientsPath,
+                     const string &interactionsPath);
 };
 
 /*******************

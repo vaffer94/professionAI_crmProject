@@ -1,6 +1,7 @@
-# Compilatore (su macOS g++ punta a clang++, va benissimo)
+# Compilatore (su macOS g++ punta a clang++)
 CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -O2 -I.
+CXXFLAGS := -std=c++17 -Wall -Wextra -O2 -I. -Ithird_party
 
 # Nome dell'eseguibile e cartelle di output
 TARGET := build/insurapro
