@@ -9,12 +9,29 @@ using std::endl;
 using std::getline;
 using std::string;
 
+const string RESET = "\033[0m";
+const string QUESTION = "\033[38;5;117m"; // light sky blue
+
 void showSplashScreen()
 {
-    std::cout << "=====================================\n";
-    std::cout << "  Benvenuto in InsuraPro Solutions\n";
-    std::cout << "  Sistema CRM - Applicazione Console\n";
-    std::cout << "=====================================\n\n";
+    const string RESET = "\033[0m";
+
+    const string Y1 = "\033[38;5;226m"; // bright yellow
+    const string Y2 = "\033[38;5;220m"; // golden yellow
+    const string Y3 = "\033[38;5;214m"; // orange
+
+    cout << Y1 << "=================================================================================================\n";
+    cout << "  Benvenuto in\n";
+    cout << "▪   ▐ ▄ .▄▄ · ▄• ▄▌▄▄▄   ▄▄▄·  ▄▄▄·▄▄▄            .▄▄ ·       ▄▄▌  ▄• ▄▌▄▄▄▄▄▪         ▐ ▄ .▄▄ · \n";
+
+    cout << Y2 << "██ •█▌▐█▐█ ▀. █▪██▌▀▄ █·▐█ ▀█ ▐█ ▄█▀▄ █·▪         ▐█ ▀. ▪     ██•  █▪██▌•██  ██ ▪     •█▌▐█▐█ ▀. \n";
+    cout << "▐█·▐█▐▐▌▄▀▀▀█▄█▌▐█▌▐▀▀▄ ▄█▀▀█  ██▀·▐▀▀▄  ▄█▀▄     ▄▀▀▀█▄ ▄█▀▄ ██▪  █▌▐█▌ ▐█.▪▐█· ▄█▀▄ ▐█▐▐▌▄▀▀▀█▄\n";
+
+    cout << Y3 << "▐█▌██▐█▌▐█▄▪▐█▐█▄█▌▐█•█▌▐█ ▪▐▌▐█▪·•▐█•█▌▐█▌.▐▌    ▐█▄▪▐█▐█▌.▐▌▐█▌▐▌▐█▄█▌ ▐█▌·▐█▌▐█▌.▐▌██▐█▌▐█▄▪▐█\n";
+    cout << "▀▀▀▀▀ █▪ ▀▀▀▀  ▀▀▀ .▀  ▀ ▀  ▀ .▀   .▀  ▀ ▀█▄▀▪     ▀▀▀▀  ▀█▄▀▪.▀▀▀  ▀▀▀  ▀▀▀ ▀▀▀ ▀█▄▀▪▀▀ █▪ ▀▀▀▀ \n";
+    cout << "  Sistema CRM - Applicazione Console\n";
+    cout << "=================================================================================================\n\n"
+         << RESET;
 }
 
 void showMainMenu(CrmData &crm)
@@ -22,7 +39,8 @@ void showMainMenu(CrmData &crm)
     int choice = -1;
     do
     {
-        cout << "\nSeleziona un'opzione (inserire il numero corrispondente):\n";
+        cout << QUESTION << "\nSeleziona un'opzione (inserire il numero corrispondente):\n"
+             << RESET;
         cout << "1️⃣  Creare un cliente 👤➕\n";
         cout << "2️⃣  Visualizzare tutti i clienti 📋\n";
         cout << "3️⃣  Modificare un cliente  ✏️\n";
@@ -80,10 +98,10 @@ void uiCreateClient(CrmData &crm)
     getline(cin >> std::ws, name);
 
     cout << "Inserisci cognome: ";
-    getline(cin, surname);
+    getline(cin >> std::ws, surname);
 
     cout << "Inserisci data di nascita (YYYY-MM-DD): ";
-    cin >> birthDate;
+    getline(cin >> std::ws, birthDate);
 
     // 🔎 check duplicates by name+surname+birthDate
     Client *existing = crm.searchClient(name, surname, birthDate);
@@ -95,10 +113,10 @@ void uiCreateClient(CrmData &crm)
     }
 
     cout << "Inserisci email: ";
-    cin >> email;
+    getline(cin >> std::ws, email);
 
     cout << "Inserisci telefono: ";
-    cin >> phone;
+    getline(cin >> std::ws, phone);
 
     Client c(name, surname, birthDate, email, phone);
     crm.clients.push_back(c);
@@ -108,7 +126,7 @@ void uiCreateClient(CrmData &crm)
 
 void uiViewClients(const CrmData &crm)
 {
-    cout << "📋 Lista clienti (" << crm.clients.size() << "):" << endl;
+    cout << QUESTION << "📋 Lista clienti (" << crm.clients.size() << "):" << RESET << endl;
 
     if (crm.clients.empty())
     {
@@ -119,10 +137,11 @@ void uiViewClients(const CrmData &crm)
     for (int i = 0; i < static_cast<int>(crm.clients.size()); i++)
     {
         const Client &c = crm.clients[i]; // take element by index
-        cout << " 👤 ID: " << c.id
-             << " | Nome e Cognome: " << c.name << " " << c.surname
+        cout << " 👤  Nome e Cognome: " << c.name << " " << c.surname
+             << " | Data di nascita: " << c.birthDate
              << " | Email: " << c.email
              << " | Telefono: " << c.phone
+             << " ID: " << c.id
              << "\n";
     }
 }
@@ -139,7 +158,7 @@ void uiEditClient(CrmData &crm)
     // 2) Confirm
     cout << "Confermi modifica di questo cliente? [Y/N]: ";
     string answer;
-    std::getline(cin, answer);
+    std::getline(cin >> std::ws, answer);
     char ch = answer.length() == 1 ? (std::toupper(answer[0])) : 'N';
 
     if (ch != 'Y')
@@ -153,7 +172,7 @@ void uiEditClient(CrmData &crm)
 
     cout << "Inserisci nuovi valori (premi ENTER per mantenere il valore attuale):\n";
     cout << "Nome [" << found->name << "]: ";
-    std::getline(cin >> std::ws, name);
+    std::getline(cin, name);
     if (name.empty())
         name = found->name;
 
@@ -204,8 +223,8 @@ void uiDeleteClient(CrmData &crm)
     if (!found)
         return; // nothing to delete
 
-    cout << "Confermi eliminazione? [Y/N]: ";
-    getline(cin, answer);
+    cout << QUESTION << "Confermi eliminazione? [Y/N]: " << RESET;
+    getline(cin >> std::ws, answer);
     char ch = answer.length() == 1 ? (std::toupper(answer[0])) : 'N';
 
     if (ch != 'Y')
@@ -232,7 +251,8 @@ void uiDeleteClient(CrmData &crm)
 
 Client *uiSearchClient(CrmData &crm)
 {
-    cout << "🔎 Ricerca cliente\n";
+    cout << QUESTION << "🔎 Ricerca cliente\n"
+         << RESET;
 
     string name, surname, birthDate;
 
@@ -341,10 +361,10 @@ void uiAddInteraction(CrmData &crm, Client &client)
     std::getline(cin >> std::ws, date);
 
     cout << "Responsabile: ";
-    std::getline(cin, responsible);
+    std::getline(cin >> std::ws, responsible);
 
     cout << "Note: ";
-    std::getline(cin, note);
+    std::getline(cin >> std::ws, note);
 
     // persist
     Interaction inter(client.id, type, status, date, responsible, note);
@@ -466,12 +486,12 @@ void uiSaveData(const CrmData &crm)
     string interactionsPath = "interactions.csv";
     string tmp;
 
-    cout << "Percorso di salvataggio clients.csv [" << clientsPath << "]: ";
+    cout << "Percorso di salvataggio clients.csv (percorso assoluto) [" << clientsPath << "]: ";
     std::getline(cin >> std::ws, tmp);
     if (!tmp.empty())
         clientsPath = tmp;
 
-    cout << "Percorso di salvataggio interactions.csv [" << interactionsPath << "]: ";
+    cout << "Percorso di salvataggio interactions.csv (percorso assoluto) [" << interactionsPath << "]: ";
     std::getline(cin, tmp);
     if (!tmp.empty())
         interactionsPath = tmp;

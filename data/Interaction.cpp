@@ -1,17 +1,9 @@
 #include "Interaction.h"
 #include <ctime>
 
-static int &interactionCounter()
-{
-    static int counter = 0;
-    return counter;
-}
-
 int Interaction::generateUniqueId()
 {
-    long t = static_cast<long>(std::time(nullptr)); // seconds since epoch
-    int c = (interactionCounter()++ % 100);         // 0..99 suffix
-    return static_cast<int>(t % 1000000000) * 100 + c;
+    return static_cast<int>(std::time(nullptr));
 }
 
 Interaction::Interaction()

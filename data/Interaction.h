@@ -39,7 +39,7 @@ public:
                 const string &note); // value ctor
 
 private:
-    static int generateUniqueId(); // timestamp + counter
+    static int generateUniqueId(); // timestamp
 };
 
 #endif

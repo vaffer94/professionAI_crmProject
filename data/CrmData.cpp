@@ -117,7 +117,10 @@ bool CrmData::loadFromCsv(const string &clientsPath,
 
         // --- clients.csv ---
         {
-            io::CSVReader<6> in(clientsPath);
+            // io::CSVReader<6> in(clientsPath);
+            // in.read_header(io::ignore_extra_column,
+            //                "id", "name", "surname", "birthDate", "email", "phone");
+            io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(clientsPath);
             in.read_header(io::ignore_extra_column,
                            "id", "name", "surname", "birthDate", "email", "phone");
 
@@ -140,7 +143,11 @@ bool CrmData::loadFromCsv(const string &clientsPath,
 
         // --- interactions.csv ---
         {
-            io::CSVReader<7> in(interactionsPath);
+            // io::CSVReader<7> in(interactionsPath);
+            // in.read_header(io::ignore_extra_column,
+            //                "id", "clientId", "type", "status", "date", "responsible", "note");ù
+
+            io::CSVReader<7, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(interactionsPath);
             in.read_header(io::ignore_extra_column,
                            "id", "clientId", "type", "status", "date", "responsible", "note");
 
