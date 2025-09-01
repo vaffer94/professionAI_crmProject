@@ -103,7 +103,7 @@ void uiCreateClient(CrmData &crm)
     cout << "Inserisci data di nascita (YYYY-MM-DD): ";
     getline(cin >> std::ws, birthDate);
 
-    // 🔎 check duplicates by name+surname+birthDate
+    // check duplicates by name+surname+birthDate
     Client *existing = crm.searchClient(name, surname, birthDate);
     if (existing != nullptr)
     {
@@ -136,7 +136,7 @@ void uiViewClients(const CrmData &crm)
 
     for (int i = 0; i < static_cast<int>(crm.clients.size()); i++)
     {
-        const Client &c = crm.clients[i]; // take element by index
+        const Client &c = crm.clients[i];
         cout << " 👤  Nome e Cognome: " << c.name << " " << c.surname
              << " | Data di nascita: " << c.birthDate
              << " | Email: " << c.email
@@ -150,12 +150,10 @@ void uiEditClient(CrmData &crm)
 {
     cout << "✏️  Modifica cliente\n";
 
-    // 1) Find the client (reuses your helper; prints the found record)
     Client *found = uiSearchClient(crm);
     if (!found)
         return;
 
-    // 2) Confirm
     cout << "Confermi modifica di questo cliente? [Y/N]: ";
     string answer;
     std::getline(cin >> std::ws, answer);
@@ -167,7 +165,6 @@ void uiEditClient(CrmData &crm)
         return;
     }
 
-    // 3) Prompt new values; Enter keeps old
     string name, surname, birthDate, email, phone;
 
     cout << "Inserisci nuovi valori (premi ENTER per mantenere il valore attuale):\n";
@@ -196,7 +193,6 @@ void uiEditClient(CrmData &crm)
     if (phone.empty())
         phone = found->phone;
 
-    // 4) Apply update through CrmData (by ID)
     const int id = found->id; // cache before any potential vector reallocation
     const bool ok = crm.updateClientById(id, name, surname, birthDate, email, phone);
 
@@ -221,7 +217,7 @@ void uiDeleteClient(CrmData &crm)
     cout << "👉 Eliminazione cliente...\n";
     Client *found = uiSearchClient(crm);
     if (!found)
-        return; // nothing to delete
+        return;
 
     cout << QUESTION << "Confermi eliminazione? [Y/N]: " << RESET;
     getline(cin >> std::ws, answer);
@@ -233,7 +229,7 @@ void uiDeleteClient(CrmData &crm)
         return;
     }
 
-    // Keep IDs/names before erasing (pointer will be invalidated after erase)
+    // Keep IDs/names before erasing
     const int targetId = found->id;
     const string fullName = found->name + " " + found->surname;
 
@@ -257,7 +253,7 @@ Client *uiSearchClient(CrmData &crm)
     string name, surname, birthDate;
 
     cout << "Nome: ";
-    getline(cin >> std::ws, name); // Use std::ws to consume any leftover newline
+    getline(cin >> std::ws, name);
 
     cout << "Cognome: ";
     getline(cin, surname);
@@ -285,7 +281,6 @@ void uiManageInteractions(CrmData &crm)
 {
     cout << "🤝 Gestione interazioni (per cliente)\n";
 
-    // 1) choose the client first
     Client *client = uiSearchClient(crm);
     if (!client)
         return;
@@ -366,7 +361,6 @@ void uiAddInteraction(CrmData &crm, Client &client)
     cout << "Note: ";
     std::getline(cin >> std::ws, note);
 
-    // persist
     Interaction inter(client.id, type, status, date, responsible, note);
     crm.interactions.push_back(inter);
     client.interactionIds.push_back(inter.id);

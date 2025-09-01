@@ -48,7 +48,7 @@ Client *CrmData::searchClient(const string &name,
         Client &c = clients[i];
         if (toLower(c.name) == toLower(name) &&
             toLower(c.surname) == toLower(surname) &&
-            c.birthDate == birthDate) // birthDate stays case-sensitive
+            c.birthDate == birthDate)
         {
             return &c;
         }
@@ -59,7 +59,7 @@ Client *CrmData::searchClient(const string &name,
 bool CrmData::deleteClientAndCascade(int clientId)
 {
     // 1) Remove all interactions linked to this client
-    for (size_t i = 0; i < interactions.size(); /* no i++ here */)
+    for (size_t i = 0; i < interactions.size();)
     {
         if (interactions[i].clientId == clientId)
         {
@@ -77,11 +77,11 @@ bool CrmData::deleteClientAndCascade(int clientId)
         if (clients[i].id == clientId)
         {
             clients.erase(clients.begin() + i);
-            return true; // removed successfully
+            return true;
         }
     }
 
-    return false; // no client with that ID
+    return false;
 }
 
 bool CrmData::updateClientById(int clientId,
@@ -176,7 +176,7 @@ bool CrmData::loadFromCsv(const string &clientsPath,
             }
         }
 
-        // Rebuild client.interactionIds (no ID regeneration)
+        // Rebuild client.interactionIds
         for (auto &c : clients)
             c.interactionIds.clear();
         for (const auto &it : interactions)
@@ -195,7 +195,6 @@ bool CrmData::loadFromCsv(const string &clientsPath,
     }
     catch (const std::exception &)
     {
-        // parser throws if files can't be opened or header mismatch
         return false;
     }
 }

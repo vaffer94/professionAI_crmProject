@@ -1,5 +1,5 @@
 #include "Client.h"
-#include <ctime> // for std::time
+#include <ctime>
 
 // Default constructor
 Client::Client()
@@ -28,5 +28,5 @@ Client::Client(const string &n,
 // Private helper
 int Client::generateUniqueId()
 {
-    return static_cast<int>(std::time(nullptr));
+  return static_cast<int>(std::time(nullptr));
 }

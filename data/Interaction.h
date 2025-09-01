@@ -22,7 +22,6 @@ enum class InteractionStatus
 class Interaction
 {
 public:
-    // Fields
     int id;
     int clientId;
     InteractionType type;
@@ -31,12 +30,11 @@ public:
     string responsible; // employee handling the interaction
     string note;
 
-    // Constructors (declared; defined in .cpp)
-    Interaction(); // default
+    Interaction();
     Interaction(int clientId, InteractionType type, InteractionStatus status,
                 const string &date,
                 const string &responsible,
-                const string &note); // value ctor
+                const string &note);
 
 private:
     static int generateUniqueId(); // timestamp

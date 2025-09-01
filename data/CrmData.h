@@ -12,11 +12,11 @@ using std::string;
 class CrmData
 {
 public:
-    // Fields (public for now, per your preference)
+    // Fields
     std::vector<Client> clients;
     std::vector<Interaction> interactions;
 
-    // Constructor (declared; defined in .cpp)
+    // Constructor
     CrmData();
 
     // Search by name+surname+birthDate

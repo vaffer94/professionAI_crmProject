@@ -14,13 +14,13 @@ public:
     string surname;
     string birthDate; // e.g. "YYYY-MM-DD"
     string email;
-    string phone;                    // phone as string (not int!)
+    string phone;
     std::vector<int> interactionIds; // IDs of this client's interactions
 
     // Default constructor
     Client();
 
-    // Value constructor (generates ID automatically)
+    // Customized constructor
     Client(const string &n,
            const string &s,
            const string &b,
